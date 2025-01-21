@@ -1,67 +1,45 @@
-DROP TABLE if exists posts cascade;
+DROP TABLE IF EXISTS users cascade;
 
-DROP TABLE if exists users cascade;
+DROP TABLE IF EXISTS groups cascade;
 
-DROP TABLE if exists replies cascade;
-
-CREATE TABLE posts (
-    post_id serial PRIMARY KEY,
-    post_title varchar(200) not null,
-    post_content varchar(2000) not null,
-    post_view INT not null default 0,
-    post_time TIMESTAMP default now (),
-    user_email varchar(140) not null
-);
+DROP TABLE IF EXISTS user_group cascade;
 
 CREATE TABLE users (
-    user_email varchar(140) PRIMARY KEY,
-    user_password varchar(200) NOT NULL,
-    user_name varchar(200) NOT NULL,
-    created_at TIMESTAMP
+    user_id uuid DEFAULT gen_random_uuid () PRIMARY KEY,
+    user_email varchar UNIQUE NOT NULL,
+    user_password varchar NOT NULL, -- 보안 목적으로 'password_hash'로 이름 변경 권장
+    user_name varchar NOT NULL,
+    created_at timestamp DEFAULT now ()
 );
 
-CREATE TABLE replies (
-    reply_id serial PRIMARY KEY,
-    reply_content varchar(2000),
-    reply_time TIMESTAMP,
-    user_email varchar(140),
-    post_id INT
+CREATE TABLE groups (
+    group_id uuid DEFAULT gen_random_uuid () PRIMARY KEY,
+    group_address varchar NOT NULL,
+    group_image varchar NOT NULL,
+    group_name varchar NOT NULL,
+    group_description text,
+    created_at timestamp DEFAULT now ()
 );
 
-ALTER TABLE posts ADD FOREIGN KEY (user_email) REFERENCES users (user_email);
+CREATE TABLE user_group (
+    user_id uuid NOT NULL,
+    group_id uuid NOT NULL,
+    joined_at timestamp DEFAULT now (),
+    UNIQUE (user_id, group_id) -- 인덱스와 UNIQUE 제약 조건을 동시에 설정
+);
 
-ALTER TABLE replies ADD FOREIGN KEY (user_email) REFERENCES users (user_email);
+ALTER TABLE user_group ADD FOREIGN KEY (group_id) REFERENCES groups (group_id) ON DELETE CASCADE;
 
-ALTER TABLE replies ADD FOREIGN KEY (post_id) REFERENCES posts (post_id);
+ALTER TABLE user_group ADD FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE;
 
-GRANT ALL PRIVILEGES ON TABLE posts to admin;
-
-GRANT ALL PRIVILEGES ON TABLE users to admin;
-
-GRANT ALL PRIVILEGES ON TABLE replies to admin;
-
-GRANT ALL PRIVILEGES ON all sequences in schema public to admin;
-
+-- 테스트 데이터 삽입
 INSERT INTO
-    users (user_email, user_password, user_name, created_at)
-VALUES
-    ('user@example.com', '1234', 'user', NOW ());
-
-INSERT INTO
-    posts (
-        post_id,
-        post_title,
-        post_content,
-        post_view,
-        post_time,
-        user_email
-    )
+    users (user_email, user_password, user_name)
 VALUES
     (
-        1,
-        'Post Title',
-        'This is the content.',
-        0,
-        NOW (),
-        'user@example.com'
+        'user@example.com',
+        'hashed_password_example',
+        'user'
     );
+
+-- 해싱된 비밀번호 사용

@@ -1,21 +1,21 @@
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::postgres::PgPool;
-use std::io;
 use std::env;
+use std::io;
 
-#[path="./routes.rs"]
-mod routes;
-#[path="./handlers/mod.rs"]
-mod handlers;
-#[path="./models/mod.rs"]
-mod models;
-#[path="./state.rs"]
-mod state;
-#[path="./dbaccess/mod.rs"]
+#[path = "./dbaccess/mod.rs"]
 mod dbaccess;
-#[path="./errors.rs"]
+#[path = "./errors.rs"]
 mod errors;
+#[path = "./handlers/mod.rs"]
+mod handlers;
+#[path = "./models/mod.rs"]
+mod models;
+#[path = "./routes.rs"]
+mod routes;
+#[path = "./state.rs"]
+mod state;
 
 use routes::*;
 use state::AppState;
@@ -25,7 +25,7 @@ async fn main() -> io::Result<()> {
     dotenv().ok();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
     let db_pool = PgPool::connect(&database_url).await.unwrap();
-    let shared_data = web::Data::new(AppState{
+    let shared_data = web::Data::new(AppState {
         health_check_response: "Zimmer is running on port 8000".to_string(),
         db: db_pool,
     });
@@ -34,7 +34,7 @@ async fn main() -> io::Result<()> {
         App::new()
             .app_data(shared_data.clone())
             .configure(general_route)
-            .configure(post_route)
+            .configure(user_route)
     })
     .bind("127.0.0.1:8000")?
     .run()
