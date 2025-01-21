@@ -29,6 +29,7 @@ mod tests {
     use dotenv::dotenv;
     use sqlx::postgres::PgPool;
     use std::env;
+
     #[actix_web::test]
     async fn user_login_success() {
         dotenv().ok();
@@ -39,12 +40,13 @@ mod tests {
             db: db_pool,
         });
         let user = web::Json(LoginUser {
-            user_email: "admin@example.com".to_string(),
-            user_password: "1234".to_string(),
+            user_email: "user@example.com".to_string(),
+            user_password: "hashed_password_example".to_string(),
         });
         let resp = user_login(app_state, user).await.unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
     }
+
     #[actix_web::test]
     async fn user_signup_success() {
         dotenv().ok();
@@ -55,9 +57,9 @@ mod tests {
             db: db_pool,
         });
         let user = web::Json(SignupUser {
-            user_email: "admin@example.com".to_string(),
+            user_email: "user2@example.com".to_string(),
             user_password: "1234".to_string(),
-            user_name: "Admin".to_string(),
+            user_name: "user2".to_string(),
         });
         let resp = user_signup(app_state, user).await.unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
