@@ -97,4 +97,41 @@ mod tests {
         // 롤백
         tx.rollback().await.unwrap();
     }
+
+    #[actix_web::test]
+    async fn update_user_success() {
+        dotenv().ok();
+        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+        let db_pool = PgPool::connect(&database_url).await.unwrap();
+
+        let app_state = web::Data::new(AppState {
+            health_check_response: "".to_string(),
+            db: db_pool,
+        });
+        let user = web::Json(UpdateUser {
+            user_name: Some("updated_admin".to_string()),
+        });
+        let params =
+            web::Path::from(Uuid::parse_str("6295f4fa-c969-45e8-95a5-594638bc07f4").unwrap());
+
+        let resp = update_user(app_state, user, params).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[actix_web::test]
+    async fn delete_user_success() {
+        dotenv().ok();
+        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+        let db_pool = PgPool::connect(&database_url).await.unwrap();
+
+        let app_state = web::Data::new(AppState {
+            health_check_response: "".to_string(),
+            db: db_pool,
+        });
+        let params =
+            web::Path::from(Uuid::parse_str("6295f4fa-c969-45e8-95a5-594638bc07f4").unwrap());
+
+        let resp = delete_user(app_state, params).await.unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
 }
