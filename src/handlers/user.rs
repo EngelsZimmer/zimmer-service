@@ -69,6 +69,7 @@ mod tests {
         assert_eq!(resp.status(), StatusCode::OK);
     }
 
+    // TODO: 롤백 안되는 문제 해결
     #[actix_web::test]
     async fn signup_success() {
         // 데이터베이스 준비

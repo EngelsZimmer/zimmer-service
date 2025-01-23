@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use sqlx::postgres::PgPool;
@@ -32,6 +33,13 @@ async fn main() -> io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(
+                Cors::default()
+                    .allow_any_origin() // 모든 도메인 허용 (개발용)
+                    .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+                    .allowed_headers(vec!["Content-Type", "Authorization"])
+                    .max_age(3600),
+            )
             .app_data(shared_data.clone())
             .configure(general_route)
             .configure(user_route)
