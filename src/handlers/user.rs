@@ -1,17 +1,23 @@
+use crate::auth::jwt::create_jwt;
 use crate::dbaccess::user::*;
 use crate::errors::ZimmerError;
 use crate::models::user::*;
 use crate::state::AppState;
 use actix_web::{web, HttpResponse};
+use std::env;
 use uuid::Uuid;
 
 pub async fn login(
     app_state: web::Data<AppState>,
     user: web::Json<LoginUser>,
 ) -> Result<HttpResponse, ZimmerError> {
-    login_db(&app_state.db, user.into())
-        .await
-        .map(|user| HttpResponse::Ok().json(user))
+    let secret_key = env::var("JWT_SECRET").expect("JWT_SECRET is not set in .env file.");
+
+    login_db(&app_state.db, user.into()).await.map(|user| {
+        let token = create_jwt(&user.user_id, &secret_key).unwrap();
+        HttpResponse::Ok().json(serde_json::json!({ "token": token }))
+    })
+    // TODO: Unauthorized ZimmerError 추가
 }
 
 pub async fn signup(

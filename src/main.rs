@@ -5,6 +5,8 @@ use sqlx::postgres::PgPool;
 use std::env;
 use std::io;
 
+#[path = "./auth/mod.rs"]
+mod auth;
 #[path = "./dbaccess/mod.rs"]
 mod dbaccess;
 #[path = "./errors.rs"]
